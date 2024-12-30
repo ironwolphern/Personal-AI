@@ -63,6 +63,7 @@ x-init-ollama: &init-ollama
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: postgres
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -79,7 +80,8 @@ services:
       - default
 
   traefik:
-    image: "traefik"
+    image: traefik
+    container_name: traefik
     restart: always
     command:
       - "--api=true"
@@ -94,8 +96,8 @@ services:
       - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
     ports:
-      - "80:80"
-      - "443:443"
+      - 80:80
+      - 443:443
     volumes:
       - traefik_storage:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -129,7 +131,7 @@ services:
     container_name: n8n
     restart: unless-stopped
     ports:
-      - 5678:5678
+      - 127.0.0.1:5678:5678
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./n8n/backup:/backup
@@ -167,6 +169,15 @@ services:
     depends_on:
       - ollama-gpu
 
+  openWebUI:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - 3000:8080
+    volumes:
+      - open-webui:/app/backend/data
+
 volumes:
   traefik_storage:
     driver: local
@@ -177,6 +188,8 @@ volumes:
   ollama_storage:
     driver: local
   qdrant_storage:
+    driver: local
+  open-webui:
     driver: local
 
 networks:
