@@ -1,0 +1,58 @@
+---
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# (Optional) Change log level and format here ...
+#     - level: [TRACE, DEBUG, INFO, WARN, ERROR, FATAL]
+# log:
+#   level: DEBUG
+
+# (Optional) Enable accesslog here ...
+# accesslog: {}
+
+# (Optional) Enable API and Dashboard here, don't do in production
+# api:
+#   dashboard: true
+#   insecure: true
+
+# Entrypoints definition
+entryPoints:
+  web:
+    address: :80
+    # (Optional) Redirect all HTTP to HTTPS
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+  websecure:
+    address: :443
+
+# Configure the certificates resolver to get Let's Encrypt certificates
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "admin@example.local"
+      storage: "/etc/traefik/acme/dnsimple-acme.json"
+      # Production ACME CA
+      # caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      # Staging ACME CA
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      keyType: EC256
+      dnsChallenge:
+        provider: dnsimple
+        # disablePropagationCheck: true
+        # delayBeforeCheck: "60s"
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: Secure
+  file:
+    directory: /etc/traefik
+    watch: true
